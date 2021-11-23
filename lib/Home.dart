@@ -67,7 +67,8 @@ class _HomeState extends State<Home> {
       _tituloController.clear();
       _descricaoController.clear();
     }
-    print("_db = $_db");
+
+    _recuperarAnotacoes();
   }
 
   _recuperarAnotacoes() async {
@@ -99,17 +100,22 @@ class _HomeState extends State<Home> {
         title: Text("Anotações"),
         backgroundColor: Colors.black,
       ),
-      body: Container(
-        padding: EdgeInsets.all(15),
-        //child: ListView.builder(
-        //  itemCount: _listaAnotacoes.length,
-        //  itemBuilder: (context, index) {
-        //    print("Lista: ${_listaAnotacoes.length}");
-        //    return ListTile(
-        //      title: Text("Teste"),
-        //    );
-        //  },
-        //),
+      body: Column(
+        children: [
+          Expanded(
+              child: ListView.builder(
+                  itemCount: _listaAnotacoes.length,
+                  itemBuilder: (context, index) {
+                    var anotacao = _listaAnotacoes[index];
+                    return Card(
+                      child: ListTile(
+                        title: Text(anotacao.titulo.toString()),
+                        subtitle:
+                            Text("${anotacao.data} - ${anotacao.descricao}"),
+                      ),
+                    );
+                  }))
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,

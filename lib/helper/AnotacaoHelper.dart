@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 
 class AnotacaoHelper {
   static final nomeTabela = "anotacao";
+  static final nomeDB = "db_anotacoes";
   static final colunaId = "id";
   static final colunaTitulo = "titulo";
   static final colunaDescricao = "descricao";
@@ -28,7 +29,7 @@ class AnotacaoHelper {
 
   inicializarDB() async {
     final caminhoDB = await getDatabasesPath();
-    final localDB = join(caminhoDB, "db_anotacoes");
+    final localDB = join(caminhoDB, nomeDB);
     print("local: $localDB");
 
     var db = await openDatabase(localDB, version: 1, onCreate: _onCreate);
@@ -49,8 +50,11 @@ class AnotacaoHelper {
   }
 
   _onCreate(Database db, int version) async {
-    String sql =
-        "CREATE TABLE $nomeTabela (id INTEGER PRIMARY KEY AUTOINCREMENT, titulo VARCHAR, descricao TEXT, data DATETIME)";
+    String sql = "CREATE TABLE $nomeTabela (" +
+        "$colunaId INTEGER PRIMARY KEY AUTOINCREMENT," +
+        "$colunaTitulo VARCHAR," +
+        "$colunaDescricao TEXT," +
+        "$colunaData DATETIME)";
     print("CREATE: ${sql}");
     await db.execute(sql);
   }
