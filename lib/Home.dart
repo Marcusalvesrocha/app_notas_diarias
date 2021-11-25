@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:notas_diarias/helper/AnotacaoHelper.dart';
-import 'package:notas_diarias/model/Anotacao.dart';
+import 'package:notas_diarias/repository/compra_repository.dart';
+import 'package:notas_diarias/model/compra.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -10,27 +10,32 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  TextEditingController _tituloController = TextEditingController();
+  TextEditingController _produtoController = TextEditingController();
   TextEditingController _descricaoController = TextEditingController();
-  var _db = AnotacaoHelper();
-  List<Anotacao> _listaAnotacoes = [];
+  TextEditingController _quantidadeController = TextEditingController();
+  TextEditingController _valorUnitarioController = TextEditingController();
+  var _db = CompraRepository();
+  List<Compra> _listaCompras = [];
 
-  _exibirTelaCadastro({var anotacao}) {
+  _exibirTelaCadastro({var compra}) {
     final tela;
     final botao;
-    if (anotacao.runtimeType == Anotacao) {
-      tela = "Editar Anotação";
+    if (compra.runtimeType == Compra) {
+      tela = "Editar Compra";
       botao = "Editar";
-      _tituloController.text = anotacao.titulo.toString();
-      _descricaoController.text = anotacao.descricao.toString();
+      _produtoController.text = compra.titulo.toString();
+      _descricaoController.text = compra.descricao.toString();
+      _quantidadeController.text = compra.quantidade.toString();
+      _valorUnitarioController.text = compra._valorUnitario.toString();
     } else {
-      tela = "Nova Anotação";
+      tela = "Nova Compra";
       botao = "Salvar";
-      _tituloController.text = "";
+      _produtoController.text = "";
       _descricaoController.text = "";
+      _quantidadeController.text = "";
+      _valorUnitarioController.text = "";
     }
 
-    print("----------> $anotacao");
     showDialog(
         context: context,
         builder: (context) {
@@ -40,9 +45,9 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: _tituloController,
+                  controller: _produtoController,
                   decoration: InputDecoration(
-                      labelText: "Titulo", hintText: "Digite o título..."),
+                      labelText: "Produto", hintText: "Digite o produto..."),
                   autofocus: true,
                 ),
                 TextField(
@@ -50,6 +55,20 @@ class _HomeState extends State<Home> {
                   decoration: InputDecoration(
                       labelText: "Descrição",
                       hintText: "Digite a descrição..."),
+                  autofocus: true,
+                ),
+                TextField(
+                  controller: _descricaoController,
+                  decoration: InputDecoration(
+                      labelText: "Quantidade",
+                      hintText: "Digite a quantidade..."),
+                  autofocus: true,
+                ),
+                TextField(
+                  controller: _descricaoController,
+                  decoration: InputDecoration(
+                      labelText: "Valor Unitário",
+                      hintText: "Digite o valor unitário..."),
                   autofocus: true,
                 ),
               ],
@@ -61,7 +80,7 @@ class _HomeState extends State<Home> {
               FlatButton(
                   onPressed: () {
                     print("Salvar Anotação");
-                    _salvarAtualizarAnotacao(anotacaoSelecionada: anotacao);
+                    _salvarAtualizarCompra(compraSelecionada: compra);
                     Navigator.pop(context);
                   },
                   child: Text(botao)),
@@ -70,22 +89,27 @@ class _HomeState extends State<Home> {
         });
   }
 
-  _salvarAtualizarAnotacao({var anotacaoSelecionada}) async {
+  _salvarAtualizarCompra({var compraSelecionada}) async {
     int resultado;
-    String titulo = _tituloController.text;
+    String produto = _produtoController.text;
     String descricao = _descricaoController.text;
-    if (anotacaoSelecionada.runtimeType == Anotacao) {
-      print("Ação Atualizar");
-      anotacaoSelecionada.Atualizar(titulo, descricao);
-      resultado = await _db.AtualizarAnotacao(anotacaoSelecionada);
+    int quantidade = _quantidadeController.text as int;
+    double valorUnitario = _valorUnitarioController.text as double;
+
+    if (compraSelecionada.runtimeType == Compra) {
+      compraSelecionada.Atualizar(
+          produto, descricao, quantidade, valorUnitario);
+      resultado = await _db.AtualizarCompra(compraSelecionada);
     } else {
       print("Ação salvar");
-      Anotacao anotacao =
-          Anotacao(titulo, descricao, DateTime.now().toString());
-      resultado = await _db.salvarAnotacao(anotacao);
+      Compra compra = Compra(produto, descricao, quantidade, valorUnitario,
+          DateTime.now().toString(), false);
+      resultado = await _db.salvarCompra(compra);
       if (resultado != 0) {
-        _tituloController.clear();
+        _produtoController.clear();
         _descricaoController.clear();
+        _quantidadeController.clear();
+        _valorUnitarioController.clear();
       }
     }
 
@@ -93,27 +117,25 @@ class _HomeState extends State<Home> {
   }
 
   _removerAnotacao(int? id) async {
-    await _db.removerAnotacao(id!);
+    await _db.removerCompra(id!);
     _recuperarAnotacoes();
   }
 
   _recuperarAnotacoes() async {
-    if (_listaAnotacoes.length != 0) {
-      _listaAnotacoes.removeRange(0, _listaAnotacoes.length);
+    if (_listaCompras.length != 0) {
+      _listaCompras.removeRange(0, _listaCompras.length);
     }
-    print("Quantidade: ${_listaAnotacoes.length}");
-    var listaAnotacoes = await _db.getAnotacoes();
+    print("Quantidade: ${_listaCompras.length}");
+    var listaAnotacoes = await _db.getCompras();
 
     for (var item in listaAnotacoes) {
-      Anotacao nota = Anotacao.fromMap(item);
-      _listaAnotacoes.add(nota);
+      Compra itemCompra = Compra.fromMap(item);
+      _listaCompras.add(itemCompra);
     }
 
     setState(() {
-      _listaAnotacoes;
+      _listaCompras;
     });
-
-    print("Lista de anotacoes: ${_listaAnotacoes.length}");
   }
 
   @override
@@ -127,26 +149,28 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Anotações"),
+        title: Text("Lista de Compra"),
         backgroundColor: Colors.black,
       ),
       body: Column(
         children: [
           Expanded(
               child: ListView.builder(
-                  itemCount: _listaAnotacoes.length,
+                  itemCount: _listaCompras.length,
                   itemBuilder: (context, index) {
-                    var anotacao = _listaAnotacoes[index];
+                    var compra = _listaCompras[index];
                     return Card(
                       child: ListTile(
-                        title: Text(anotacao.titulo.toString()),
+                        title: Text(compra.produto.toString()),
+                        subtitle: Text(
+                            "${compra.formatarData()} - ${compra.descricao}"),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
                                 onTap: () {
                                   print("Icone editar");
-                                  _exibirTelaCadastro(anotacao: anotacao);
+                                  _exibirTelaCadastro(compra: compra);
                                 },
                                 child: Icon(
                                   Icons.edit,
@@ -157,7 +181,7 @@ class _HomeState extends State<Home> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                _removerAnotacao(anotacao.id);
+                                _removerAnotacao(compra.id);
                               },
                               child: Icon(
                                 Icons.remove_circle,
@@ -166,8 +190,6 @@ class _HomeState extends State<Home> {
                             ),
                           ],
                         ),
-                        subtitle: Text(
-                            "${anotacao.formatarData()} - ${anotacao.descricao}"),
                       ),
                     );
                   }))
