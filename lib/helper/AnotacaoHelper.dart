@@ -42,11 +42,26 @@ class AnotacaoHelper {
     return id;
   }
 
+  Future<int> AtualizarAnotacao(Anotacao anotacao) async {
+    var bancoDados = await db;
+    return await bancoDados.update(nomeTabela, anotacao.toMap(),
+        where: "id = ?", whereArgs: [anotacao.id]);
+  }
+
   Future<List> getAnotacoes() async {
     var bancoDados = await db;
     String sql = "SELECT * FROM $nomeTabela ORDER BY data DESC";
     List listaAnotacoes = await bancoDados.rawQuery(sql);
     return listaAnotacoes;
+  }
+
+  Future<int> removerAnotacao(int id) async {
+    var bancoDados = await db;
+    return await bancoDados.delete(
+      nomeTabela,
+      where: "id = ?",
+      whereArgs: [id],
+    );
   }
 
   _onCreate(Database db, int version) async {
