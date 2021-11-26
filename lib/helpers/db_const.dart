@@ -2,6 +2,7 @@ class DbConst {
   static final nomeDB = "db_compras";
 
   static final nomeTabela = "compras";
+
   static final colunaId = "id";
   static final colunaProduto = "produto";
   static final colunaDescricao = "descricao";
@@ -9,6 +10,8 @@ class DbConst {
   static final colunaValorUnitario = "valorUnitario";
   static final colunaData = "data";
   static final colunaDone = "done";
+
+  static final defaultDone = 0;
 
   get NomeTabela => nomeTabela;
 

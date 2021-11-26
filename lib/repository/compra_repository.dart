@@ -33,6 +33,7 @@ class CompraRepository {
 
   Future<int> salvarCompra(Compra compra) async {
     var bancoDados = await db;
+    print("insert ${compra.descricao}");
     int id = await bancoDados.insert(dbConsts.NomeTabela, compra.toMap());
     return id;
   }
@@ -46,6 +47,7 @@ class CompraRepository {
   Future<List> getCompras() async {
     var bancoDados = await db;
     String sql = "SELECT * FROM ${dbConsts.NomeTabela} ORDER BY data DESC";
+    print(sql);
     List listaCompras = await bancoDados.rawQuery(sql);
     return listaCompras;
   }
@@ -66,7 +68,7 @@ class CompraRepository {
         "${dbConsts.ColunaDescricao} TEXT," +
         "${dbConsts.ColunaQuantidade} INTEGER," +
         "${dbConsts.ColunaValorUnitario} REAL," +
-        "${dbConsts.ColunaData} DATETIME" +
+        "${dbConsts.ColunaData} DATETIME," +
         "${dbConsts.ColunaDone} INTEGER)";
     await db.execute(sql);
   }

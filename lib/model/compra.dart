@@ -10,7 +10,7 @@ class Compra {
   int? quantidade;
   double? valorUnitario;
   String? data;
-  bool? done;
+  int? done;
 
   Compra(this.produto, this.descricao, this.quantidade, this.valorUnitario,
       this.data, this.done);
@@ -28,7 +28,7 @@ class Compra {
   }
 
   Atualizar(String produto, String descricao, int quantidade,
-      double valorUnitario, bool done) {
+      double valorUnitario, int done) {
     this.produto = produto;
     this.descricao = descricao;
     this.quantidade = quantidade;
