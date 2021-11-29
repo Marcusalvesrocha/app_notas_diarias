@@ -27,13 +27,12 @@ class Compra {
     done = map[DbConst.colunaDone];
   }
 
-  Atualizar(String produto, String descricao, int quantidade,
-      double valorUnitario, int done) {
+  Atualizar(
+      String produto, String descricao, int quantidade, double valorUnitario) {
     this.produto = produto;
     this.descricao = descricao;
     this.quantidade = quantidade;
     this.valorUnitario = valorUnitario;
-    this.done = done;
   }
 
   Map<String, dynamic> toMap() {
@@ -58,5 +57,14 @@ class Compra {
     var formatador = DateFormat.yMd("pt_BR");
 
     return formatador.format(DateTime.parse(this.data!));
+  }
+
+  String ValorTotal() {
+    double valorTotal = 0;
+    if (quantidade != null && valorUnitario != null) {
+      valorTotal = quantidade! * valorUnitario!;
+    }
+
+    return valorTotal.toString();
   }
 }

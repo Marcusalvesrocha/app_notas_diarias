@@ -96,17 +96,20 @@ class _HomeState extends State<Home> {
         });
   }
 
-  _salvarAtualizarCompra({var compraSelecionada}) async {
+  _salvarAtualizarCompra({Compra? compraSelecionada}) async {
     int resultado;
     String produto = _produtoController.text;
     String descricao = _descricaoController.text;
-    int quantidade = int.parse(_quantidadeController.text);
-    double valorUnitario = double.parse(_valorUnitarioController.text);
-    int done = int.parse(_doneController.text);
+    int quantidade = _quantidadeController.text != ""
+        ? int.parse(_quantidadeController.text)
+        : 0;
+    double valorUnitario = _valorUnitarioController.text != ""
+        ? double.parse(_valorUnitarioController.text)
+        : 0;
 
     if (compraSelecionada.runtimeType == Compra) {
-      compraSelecionada.Atualizar(
-          produto, descricao, quantidade, valorUnitario, done);
+      compraSelecionada!
+          .Atualizar(produto, descricao, quantidade, valorUnitario);
       resultado = await _db.AtualizarCompra(compraSelecionada);
     } else {
       print("Ação salvar");
@@ -121,6 +124,11 @@ class _HomeState extends State<Home> {
       }
     }
 
+    _recuperarCompras();
+  }
+
+  _atualizarDone(var id, int done) async {
+    await _db.AtualizarDone(id, done);
     _recuperarCompras();
   }
 
@@ -167,44 +175,42 @@ class _HomeState extends State<Home> {
               itemCount: _listaCompras.length,
               itemBuilder: (context, index) {
                 var compra = _listaCompras[index];
+
                 return Dismissible(
                   key: Key(DateTime.now().microsecondsSinceEpoch.toString()),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    _removerAnotacao(compra.id);
+                  },
                   child: Card(
                     child: ListTile(
-                      title: Text(compra.produto.toString()),
+                      title: Text(
+                          "${compra.produto.toString()}: R\$${compra.ValorTotal()}"),
                       subtitle: Text(
                           "${compra.formatarData()} - ${compra.descricao}"),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          GestureDetector(
+                            onTap: () {
+                              print("Icone editar");
+                              _exibirTelaCadastro(compra: compra);
+                            },
+                            child: Icon(
+                              Icons.edit,
+                              color: Colors.green,
+                            ),
+                          ),
                           Checkbox(
                             value: compra.done == 0 ? false : true,
                             onChanged: (value) {
-                              setState(() {
-                                compra.done = value! ? 1 : 0;
-                              });
+                              compra.done = value! ? 1 : 0;
+                              //_salvarAtualizarCompra(compraSelecionada: compra);
+                              _atualizarDone(compra.id, value ? 1 : 0);
                             },
                           ),
-                          GestureDetector(
-                              onTap: () {
-                                print("Icone editar");
-                                _exibirTelaCadastro(compra: compra);
-                              },
-                              child: Icon(
-                                Icons.edit,
-                                color: Colors.green,
-                              )),
                           Padding(
                             padding: EdgeInsets.only(right: 16),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              _removerAnotacao(compra.id);
-                            },
-                            child: Icon(
-                              Icons.remove_circle,
-                              color: Colors.red,
-                            ),
                           ),
                         ],
                       ),

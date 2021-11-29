@@ -44,6 +44,13 @@ class CompraRepository {
         where: "id = ?", whereArgs: [compra.id]);
   }
 
+  Future<int> AtualizarDone(int id, int done) async {
+    var bancoDados = await db;
+    print("Atualizar Done");
+    return await bancoDados
+        .rawUpdate("UPDATE compras SET done = ? WHERE id = ?", [done, id]);
+  }
+
   Future<List> getCompras() async {
     var bancoDados = await db;
     String sql = "SELECT * FROM ${dbConsts.NomeTabela} ORDER BY data DESC";
